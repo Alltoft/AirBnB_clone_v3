@@ -1,68 +1,66 @@
 #!/usr/bin/python3
-"""creation of a new view for amenity that handles all api actions"""
-from models.amenity import Amenity
-from flask import Flask, jsonify, Blueprint, request, abort, make_response
+"""a new view for State objects that handles all default RESTFul
+API actions"""
 from api.v1.views import app_views
+from models.amenity import Amenity
 from models import storage
+from flask import jsonify, abort, request
 
 
 @app_views.route('/amenities', methods=['GET'], strict_slashes=False)
-def get_all_amenities():
-    """gets info about all amenity objetcts from storage"""
-    all_amenities = storage.all(Amenity).values()
-    dict_amenities = [amenity.to_dict() for amenity in all_amenities]
-    return jsonify(dict_amenities)
+def all_amenities():
+    """Retrieves the list of all State objects"""
+    amenities = storage.all(Amenity).values()
+    amenities_list = [a.to_dict() for a in amenities]
+    return jsonify(amenities_list)
 
 
-@app_views.route(
-        "/amenities/<amenity_id>", methods=["GET"], strict_slashes=False)
-def get_amenity(amenity_id):
-    """gets info about amenity objects based on their id"""
-    amenity = storage.get(Amenity, amenity_id)
-    if not amenity:
+@app_views.route('/amenities/<amenity_id>', methods=['GET'], strict_slashes=False)
+def id_amenity(amenity_id):
+    """Retrieves a State object"""
+    amenity = storage.get(amenity, amenity_id)
+    if amenity is None:
         abort(404)
     return jsonify(amenity.to_dict())
 
 
-@app_views.route(
-        "/amenities/<amenity_id>", methods=["DELETE"], strict_slashes=False)
-def delete_amenity(amenity_id):
-    """deletes an amenity, and if"""
-    """and if amenity_id is not linked to any Amenity object, raise 404"""
+@app_views.route('/amenities/<amenity_id>', methods=['DELETE'],
+                 strict_slashes=False)
+def delete(amenity_id):
+    """Deletes a State object"""
     amenity = storage.get(Amenity, amenity_id)
-    if not amenity:
+    if amenity is None:
         abort(404)
     storage.delete(amenity)
     storage.save()
-    return make_response(jsonify({}), 200)
+    return jsonify({}), 200
 
 
 @app_views.route('/amenities', methods=['POST'], strict_slashes=False)
-def post_amenity():
-    """posting a new amenity"""
-    amenity_data = request.get_json(silent=True)
-    if not amenity_data:
+def post():
+    """Creates a State"""
+    dict = request.get_json(silent=True)
+    if dict is None:
         abort(400, 'Not a JSON')
-    if 'name' not in amenity_data:
+    if dict.get("name") is None:
         abort(400, 'Missing name')
-    amenity = Amenity(**amenity_data)
-    amenity.save()
-    return make_response(jsonify(amenity.to_dict()), 201)
+    new_status = Amenity(**dict)
+    new_status.save()
+    return jsonify(new_status.to_dict()), 201
 
 
-@app_views.route(
-        '/amenities/<amenity_id>', methods=['PUT'], strict_slashes=False)
-def update_amenity(amenity_id):
-    """updates an amenity objects"""
+@app_views.route('/amenities/<amenity_id>', methods=['PUT'], strict_slashes=False)
+def put(amenity_id):
+    """Updates a State object"""
     amenity = storage.get(Amenity, amenity_id)
-    if not amenity:
+    if amenity is None:
         abort(404)
-    amenity_data = request.get_json(silent=True)
-    if not amenity_data:
+    dict = request.get_json(silent=True)
+    if dict is None:
         abort(400, 'Not a JSON')
-    excluded_keys = ['id', 'created_at', 'updated_at']
-    for key, val in amenity_data.items():
-        if key not in excluded_keys:
+    keys_substract = ['id', 'created_at', 'updated_at']
+    for key, val in dict.items():
+        if key not in keys_substract:
             setattr(amenity, key, val)
-    amenity.save()
-    return make_response(jsonify(amenity.to_dict()), 200)
+    storage.save()
+    return jsonify(amenity.to_dict()), 200
