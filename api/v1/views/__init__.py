@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-"""init is everything"""
 from flask import Blueprint
 
 
