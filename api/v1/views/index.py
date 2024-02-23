@@ -14,9 +14,12 @@ def Json_status():
 @app_views.route('/stats', strict_slashes=False)
 def number_obj():
     """return numb of each obj"""
-    return (jsonify({"amenity": storage.count("Amenity"),
-                     "cities": storage.count("City"),
-                     "places": storage.count("Place"),
-                     "reviews": storage.count("Review"),
-                     "states": storage.count("State"),
-                     "users": storage.count("User")}))
+    stats_dic = {
+        "amenities": storage.count("Amenity"),
+        "cities": storage.count("City"),
+        "places": storage.count("Place"),
+        "reviews": storage.count("Review"),
+        "states": storage.count("State"),
+        "users": storage.count("User"),
+    }
+    return jsonify(stats_dic)
