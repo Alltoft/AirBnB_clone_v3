@@ -62,5 +62,5 @@ def put(state_id):
     for key, val in dict.items():
         if key not in keys_substract:
             setattr(state, key, val)
-    state.save()
+    storage.save()
     return make_response(jsonify(state.to_dict()), 200)
