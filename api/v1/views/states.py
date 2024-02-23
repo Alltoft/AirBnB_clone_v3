@@ -55,7 +55,7 @@ def put(state_id):
     state = storage.get(State, state_id)
     if state is None:
         abort(404)
-    dict = request.get_json()
+    dict = request.get_json(silent=True)
     if dict is None:
         abort(400, 'Not a JSON')
     keys_substract = ['id', 'created_at', 'updated_at']
