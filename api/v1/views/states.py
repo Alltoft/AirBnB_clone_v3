@@ -4,7 +4,7 @@ API actions"""
 from api.v1.views import app_views
 from models.state import State
 from models import storage
-from flask import jsonify, abort, request
+from flask import jsonify, abort, make_response, request
 
 
 @app_views.route('/states', methods=['GET'], strict_slashes=False)
@@ -33,7 +33,7 @@ def delete(state_id):
         abort(404)
     storage.delete(state)
     storage.save()
-    return jsonify({}), 200
+    return make_response(jsonify({}), 200)
 
 
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
@@ -46,35 +46,21 @@ def post():
         abort(400, 'Missing name')
     new_status = State(**dict)
     new_status.save()
-    return jsonify(new_status.to_dict()), 201
+    return make_response(jsonify(new_status.to_dict()), 201)
 
 
 @app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
-def update_state(state_id):
-    """Updates an existing state object based on id
-           Parameters:
-               state_id [str]: the id of the state to update
-
-           Returns:
-               A JSON dictionary of the udpated state in a 200 response
-               A 400 response if not a valid JSON
-               A 404 response if the id does not match
-    """
-    state = storage.get('State', state_id)
-    error_message = ""
-    if state:
-        content = request.get_json(silent=True)
-        if type(content) is dict:
-            ignore = ['id', 'created_at', 'updated_at']
-            for name, value in content.items():
-                if name not in ignore:
-                    setattr(state, name, value)
-            storage.save()
-            return jsonify(state.to_dict())
-        else:
-            error_message = "Not a JSON"
-            response = jsonify({'error': error_message})
-            response.status_code = 400
-            return response
-
-    abort(404)
+def put(state_id):
+    """Updates a State object"""
+    state = storage.get(State, state_id)
+    if state is None:
+        abort(404)
+    dict = request.get_json()
+    if dict is None:
+        abort(400, 'Not a JSON')
+    keys_substract = ['id', 'created_at', 'updated_at']
+    for key, val in dict.items():
+        if key not in keys_substract:
+            setattr(state, key, val)
+    storage.save()
+    return make_response(jsonify(state.to_dict()), 200)
