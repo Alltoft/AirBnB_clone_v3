@@ -41,13 +41,9 @@ def post():
     """Creates a State"""
     dict = request.get_json(silent=True)
     if dict is None:
-        resp = jsonify({'error': 'Not a JSON'})
-        resp.status_code = 400
-        return resp
+        abort(400, 'Not a JSON')
     if dict.get("name") is None:
-        resp = jsonify({'error': 'Missing name'})
-        resp.status_code = 400
-        return resp
+        abort(400, 'Missing name')
     new_status = State(**dict)
     new_status.save()
     return jsonify(new_status.to_dict()), 201
