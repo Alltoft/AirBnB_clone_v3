@@ -20,6 +20,12 @@ def handle_404(exep):
     return make_response(jsonify({"error": "Not found"}), 404)
 
 if __name__ == "__main__":
+    """sumary_line
+    Keyword arguments:
+    argument -- description
+    Return: return_description
+    """
+    
     host = os.getenv('HBNB_API_HOST', '0.0.0.0')
     port = os.getenv('HBNB_API_PORT', 5000)
     app.run(host=host, port=port, threaded=True)
