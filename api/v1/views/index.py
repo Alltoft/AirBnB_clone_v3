@@ -11,7 +11,7 @@ def Json_status():
     return (jsonify({"status": "OK"}))
 
 
-@app_views.route('/stats', methods=['GET'])
+@app_views.route('/stats', strict_slashes=False)
 def number_obj():
     """return numb of each obj"""
     return (jsonify({"amenity": storage.count("Amenity"),
